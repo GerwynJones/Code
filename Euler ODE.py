@@ -55,23 +55,18 @@ yi = 1
 ypi = 1
 
 #time steps 
-dt = 2/abs(400*l)  
+dt = (1/2)**np.linspace(1,18,18) 
 
-Tmax = 10
+Tmax = 1
 
 #initial conditions
 ic = np.array([ti, yi, ypi, l])  # initial time, final time, initial y  
  
 # solving ODE
-ydt,ta =  ODEsolve(Tmax, dt, f, euler, ic)
 
-ydt2,tb = ODEsolve(Tmax,dt/2,f, euler, ic)
 
-ydt4,tc = ODEsolve(Tmax,dt/4,f, euler, ic)
 
-ya = ydt[0,:]
-yb = ydt2[0,:]
-yc = ydt4[0,:]
+
 
 plt.subplot(2,1,1)
 plt.plot(ta,ya, label='dt')
