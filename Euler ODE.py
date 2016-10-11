@@ -2,7 +2,7 @@
 """
 Created on Tue Oct 04 09:37:15 2016
 
-@author: Admin
+@author: Gerwyn Jones
 """
 
 from __future__ import division
