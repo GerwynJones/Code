@@ -2,108 +2,118 @@
 """
 Created on Tue Oct 04 09:37:15 2016
 
-@author: gezer
+@author: C1331824
 """
-
 from __future__ import division
 import numpy as np 
 import matplotlib.pyplot as plt
-from scipy.integrate import odeint
-
 
 def f(y, l):
     """ A function to call yprime and y """
     return y[1], l*y[0]
-
-
-def euler(y, f, dt, l):
+    
+def Euler(ya, f, dt, l):
     """ The Y array has two values so we need to split them up 
     when using euler"""
-    f1,f2 = f(y, l)   # f1 gives the value y of the function and f2 gives the value of yprime of the function
-    yb,yc = y        # yb gives the initial y values and yc gives initail yp values
+    fy,fyp = f(ya, l)   # f1 gives the value y of the function and f2 gives the value of yprime of the function
+    yi,ypi = ya        # yb gives the initial y values and yc gives initail yp values
   
     # using euler method
-    ya = yb + dt*f1  # y value
-    yp = yc + dt*f2  # yprime value
+    y = yi + dt*fy  # y value
+    yp = ypi + dt*fyp  # yprime value
     
-    return ya,yp
-           
-        
-def ODEsolve(Tmax, dt, f, method, ic): 
-          
-    N = int (Tmax/dt) 
+    return y,yp
+               
+def ODEsolve(Tmax, N, f, method, ic): 
     
     t = np.zeros(N)   # defining the time array
-    t[0] = ic[0]
+    dt = Tmax/N; t[0] = ic[0]
 
     y = np.zeros((2,N))  # defining a y array containging the y values and yp values
-    y[0,0] = ic[1]
-    y[1,0] = ic[2]
+    y[0,0] = ic[1]; y[1,0] = ic[2]
     
-    for i in xrange(0,N-1):
-        y[:,i+1] = method(y[:,i], f, dt , ic[3])
+    for i in xrange(0,int(N)-1):
+        y[:,i+1]  = method(y[:,i], f, dt , ic[3])
         t[i+1] = t[i] + dt
         
     return y, t 
     
 #lambda
-w = 2*pi
-l = -w*w
+w = 2*np.pi; l = -w*w
 
-#initial times 
-ti = 0 
-yi = 1
-ypi = 0
+#defining initial conditions 
+ti = 0; Tmax = 1
+yi = 1; ypi = 0
 
 #time steps 
-dt = 2/abs(int(500*l))  
+N = 1000; n = np.array([N,2*N,4*N])
 
-Tmax = 10
-
-#initial conditions
-ic = np.array([ti, yi, ypi, l])  # initial time, final time, initial y  
+#collecting initial conditions
+ic = np.array([ti, yi, ypi, l])  # initial time, final time, initial y and lambda
  
 # solving ODE
-ydt,ta =  ODEsolve(Tmax, dt, f, euler, ic)
+R = [ODEsolve(Tmax, N, f, Euler, ic) for i,N in enumerate(n)]
 
-ydt2,tb = ODEsolve(Tmax, dt/2, f, euler, ic)
+def f1(t,l): 
+    return np.cos(l*t)    # eq of d^2y/dt^2
 
-ydt4,tc = ODEsolve(Tmax, dt/4, f, euler, ic)
+for i in range(len(R)):
+    T = R[i][1]; Y = R[i][0][0]
+    plt.subplot(2,1,1)
+    plt.plot(T, Y, label=r'$dt = %.5f$' %(Tmax/n[i]))
+    plt.xlabel(r'$Time$')
+    plt.ylabel(r'$Y$') 
+    plt.title('Graph of ODE')
+    plt.legend(loc='best') 
+    plt.grid() 
+    plt.subplot(2,1,2)
+    plt.plot(T, f1(T,w)-Y, label=r'$delta$ $t = %.5f$' %(Tmax/n[i]) )
+    plt.xlabel(r'$Time$')
+    plt.ylabel(r'$Error$') 
+    plt.legend(loc='best')
+    plt.grid() 
+    
+def ConvergenceTest(ODEsolve, Tmax, n, f, ic, method, order):
+    
+    R = [ODEsolve(Tmax, N, f, method, ic) for i,N in enumerate(n)]  
+    Y1 = R[0][0][0]; Y2 = R[1][0][0]; Y4 = R[2][0][0]
+    
+    diff1 = (Y1 - Y2[::2])
+    diff2 = (2**order)*(Y2[::2] - Y4[::4])
+    
+    return diff1,diff2
 
-ya = ydt[0,:]
-yb = ydt2[0,:]
-yc = ydt4[0,:]
+d1,d2 = ConvergenceTest(ODEsolve, Tmax, n, f, ic, Euler, 1)
 
+plt.figure()
 plt.subplot(2,1,1)
-plt.plot(ta,ya, label='dt')
-plt.plot(tb,yb, label='dt/2')
-plt.plot(tc,yc, label='dt/4')
+plt.plot(d1, label=r'$Y - Y/2$')
+plt.plot(d2, label=r'$Y/2 - Y/4$')
+plt.xlabel(r'$Time$')
+plt.ylabel(r'$Convergence$') 
+plt.title('Graph of Convergence and Errors')
+plt.legend(loc='best') 
+plt.grid() 
+plt.subplot(2,1,2)
+plt.plot(d1/d2, label=r'$\frac{Y - Y/2}{Y/2 - Y/4}$')
+plt.xlabel(r'$Time$')
+plt.ylabel(r'$Error$') 
+plt.legend(loc='best')
+plt.grid() 
+    
+dt = (1/2)**np.linspace(1,18,18); Na = Tmax/dt
+
+A = [ODEsolve(Tmax, n, f, Euler, ic) for i, n in enumerate(Na)] 
+
+Ydt = [A[i][0][0][-1] for i in range(len(A))]
+Tdt = [A[i][1][-1] for i in range(len(A))]
+
+Te = np.array(Tdt); Ye = f1(Te,w)
+ 
+plt.figure()   
+plt.loglog(Na, Ydt, label=r'$Error$')
 plt.xlabel(r'$Time$')
 plt.ylabel(r'$Y$') 
-plt.title('Graph of a ODE')
+plt.title('Graph of ODE')
 plt.legend(loc='best') 
-plt.grid() 
-
-N = int (Tmax/dt) 
-
-def f1(t,l):
-    y = cos(l*t)
-    #y = np.exp(l*t)    
-    
-    return y # eq of d^2y/dt^2
-        
-
-# splitting the y array into 2 parts
-y1 = f1(ta,w)
-y2 = f1(tb,w)
-y3 = f1(tc,w)
-
-plt.subplot(2,1,2)
-plt.plot(ta, ya-y1, label='error dt')
-plt.plot(tb, (yb-y2), label='error dt/2')
-plt.plot(tc, (yc-y3), label='error dt/4')
-plt.xlabel(r'$Time$')
-plt.ylabel(r"$Error$") 
-plt.legend(loc='best') 
-plt.grid() 
-plt.show()
+plt.grid()     
