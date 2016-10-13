@@ -23,6 +23,26 @@ def Euler(y, f, t, dt, l):
     yp = yc + dt*f2  # yprime value
     
     return ya,yp
+    
+def Rk4(ya, f, t, dt, l):
+    """ The Y array has two values so we need to split them up 
+    when using euler"""
+#    f1,f2 = f(t, y, l)   # f1 gives the value y of the function and f2 gives the value of yprime of the function
+    yi,ypi = ya        # yb gives the initial y values and yc gives initail yp values
+
+    # using Runge-Kutta method
+    k1 = f(t, ya, l)
+    ki1 = np.array(k1)
+    k2 = f(t,ya + ki1*dt/2, l)
+    ki2 = np.array(k2)
+    k3 = f(t,ya + ki2*dt/2, l)
+    ki3 = np.array(k3)
+    k4 = f(t,ya + ki3*dt, l)  
+  
+    y = yi + (dt/6)*(k1[0] + 2*k2[0] + 2*k3[0] + k4[0])  # y value
+    yp = ypi + (dt/6)*(k1[1] + 2*k2[1] + 2*k3[1] + k4[1])  # yprime value
+#    
+    return y, yp
                
 def ODEsolve(Tmax, N, f, method, ic): 
     
