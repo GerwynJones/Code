@@ -64,4 +64,4 @@ for	i	in	range(1,Nt+1):
     u[0,i] = u[Nx,i]
     u[Nx+1,i] = u[1,i] 
     
-plot(u)
+plot(xgrid,u[:,0])
