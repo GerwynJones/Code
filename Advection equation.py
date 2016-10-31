@@ -8,6 +8,10 @@ Created on Mon Oct 24 11:53:53 2016
 from __future__ import division
 import numpy as np 
 import matplotlib.pyplot as plt
+import time
+
+from PyQt4.QtGui import QApplication # essential for Windows
+plt.ion() # needed for interactive plotting
 
 
 ### defining the 3 right hand side functions
@@ -64,4 +68,11 @@ for	i	in	range(1,Nt+1):
     u[0,i] = u[Nx,i]
     u[Nx+1,i] = u[1,i] 
     
-plot(xgrid,u[:,0])
+line1, = plt.plot(x, U[:,0], linewidth=1.0, color='r',label='re') 
+
+for i in range(1,len(t)): # this steps through t values
+    line1.set_ydata(U[:,i]) # changes the data for line1 
+    plt.draw()
+
+plt.ioff() 
+plt.show()

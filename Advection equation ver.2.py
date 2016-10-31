@@ -83,7 +83,7 @@ def solver(Xc, Nx, T, c, method, func):
 
 x, t, U = solver(Xc, Nx, T, c, Euler, func)
 
-line1, = plt.plot(x, U[:,0], linewidth=4.0, color='r',label='re') 
+line1, = plt.plot(x, U[:,0], linewidth=1.0, color='r',label='re') 
 
 for i in range(1,len(t)): # this steps through t values
     line1.set_ydata(U[:,i]) # changes the data for line1 
